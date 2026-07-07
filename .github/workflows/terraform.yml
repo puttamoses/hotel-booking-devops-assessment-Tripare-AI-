@@ -1,0 +1,62 @@
+name: Terraform
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - ".github/workflows/terraform.yml"
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+      - run: terraform fmt -check -recursive infra
+
+  plan:
+    needs: fmt
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, prod]
+    defaults:
+      run:
+        working-directory: infra/envs/${{ matrix.env }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID || 'AKIAIOSFODNN7EXAMPLE' }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY || 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' }}
+      AWS_DEFAULT_REGION: ap-south-1
+      TF_VAR_db_password: ci-plan-only-placeholder
+      TF_VAR_skip_aws_account_lookup: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+          terraform_wrapper: true
+      - run: terraform init
+      - run: terraform validate -no-color
+      - id: plan
+        run: terraform plan -no-color -refresh=false
+        continue-on-error: true
+      - uses: actions/github-script@v7
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+          ENVIRONMENT: ${{ matrix.env }}
+        with:
+          script: |
+            const maxLen = 60000
+            let plan = process.env.PLAN || "no output"
+            if (plan.length > maxLen) plan = plan.slice(0, maxLen) + "\n... (truncated)"
+            const body = `#### Terraform Plan — \`${process.env.ENVIRONMENT}\`\n\`\`\`\n${plan}\n\`\`\``
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            })
+      - if: steps.plan.outcome == 'failure'
+        run: exit 1

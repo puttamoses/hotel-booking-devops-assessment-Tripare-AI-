@@ -13,6 +13,12 @@ variable "environment" {
   default = "prod"
 }
 
+variable "skip_aws_account_lookup" {
+  description = "Set true in CI to plan without real AWS credentials"
+  type        = bool
+  default     = false
+}
+
 # --- Networking ---
 
 variable "vpc_cidr" {

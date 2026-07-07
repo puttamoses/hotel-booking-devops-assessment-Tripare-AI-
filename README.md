@@ -52,3 +52,13 @@ minor versions.
 RDS is private (`publicly_accessible = false`), reachable only from the ECS
 security group; ECS is reachable only from the ALB; the ALB is the only
 public entrypoint.
+
+## CI
+
+`.github/workflows/terraform.yml` runs on pull requests touching `infra/**`:
+`fmt` → `init` → `validate` → `plan` for both `dev` and `prod`, with each
+plan posted as a PR comment. No real AWS account is required — the job uses
+placeholder credentials plus `skip_aws_account_lookup = true`, which skips
+the AWS provider's account/credential checks so plans render without cloud
+access. Set repo secrets `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` to
+plan against a real account instead.
