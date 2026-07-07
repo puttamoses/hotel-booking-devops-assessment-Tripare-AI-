@@ -53,6 +53,29 @@ RDS is private (`publicly_accessible = false`), reachable only from the ECS
 security group; ECS is reachable only from the ALB; the ALB is the only
 public entrypoint.
 
+## Local database (Part 4)
+
+```bash
+cp .env.example .env
+docker compose up -d
+docker compose ps        # wait for "healthy"
+```
+
+Postgres 16 starts on `localhost:5432` (override via `.env`). On first boot,
+Postgres auto-runs everything in `db/migrations/` in filename order — right
+now that's `001_create_tables.sql`, creating `hotel_bookings` and
+`booking_events` (with `booking_events.booking_id` as a foreign key into
+`hotel_bookings.id`).
+
+Verify:
+
+```bash
+docker compose exec db psql -U app_admin -d hotel_bookings -c '\dt'
+```
+
+To re-run migrations from scratch: `docker compose down -v` (drops the data
+volume) then `docker compose up -d` again.
+
 ## CI
 
 `.github/workflows/terraform.yml` runs on pull requests touching `infra/**`:
