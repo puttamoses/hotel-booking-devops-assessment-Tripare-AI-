@@ -24,7 +24,19 @@ fi
 mkdir -p backups
 timestamp=$(date +%Y%m%d_%H%M%S)
 out="backups/${POSTGRES_DB}_${timestamp}.dump"
+tmp="${out}.tmp"
 
-"${COMPOSE[@]}" exec -T db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -F c > "$out"
+cleanup() { rm -f "$tmp"; }
+trap cleanup EXIT
+
+"${COMPOSE[@]}" exec -T db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -F c > "$tmp"
+
+if [ ! -s "$tmp" ]; then
+  echo "Backup failed: pg_dump produced an empty file" >&2
+  exit 1
+fi
+
+mv "$tmp" "$out"
+trap - EXIT
 
 echo "Backup written to $out"
