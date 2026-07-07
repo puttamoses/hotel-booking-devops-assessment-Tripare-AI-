@@ -1,0 +1,28 @@
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  # Local backend, state kept separate per environment via the path below.
+  # A real prod environment should use a remote backend with locking, e.g.:
+  #
+  # backend "s3" {
+  #   bucket         = "hotel-booking-tfstate-prod"
+  #   key            = "prod/terraform.tfstate"
+  #   region         = "ap-south-1"
+  #   dynamodb_table = "hotel-booking-tf-locks"
+  #   encrypt        = true
+  # }
+  backend "local" {
+    path = "prod.tfstate"
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
