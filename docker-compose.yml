@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:18
+    image: postgres:16
     container_name: hotel-booking-db
     restart: unless-stopped
     environment:
