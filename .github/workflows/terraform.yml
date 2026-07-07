@@ -37,8 +37,8 @@ jobs:
         working-directory: infra/envs/${{ matrix.env }}
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID || 'AKIAIOSFODNN7EXAMPLE' }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY || 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' }}
       AWS_DEFAULT_REGION: ap-south-1
       TF_VAR_db_password: ci-plan-only-placeholder
       TF_VAR_skip_aws_account_lookup: "true"
