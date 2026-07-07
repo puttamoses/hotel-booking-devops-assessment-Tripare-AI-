@@ -76,6 +76,55 @@ docker compose exec db psql -U app_admin -d hotel_bookings -c '\dt'
 To re-run migrations from scratch: `docker compose down -v` (drops the data
 volume) then `docker compose up -d` again.
 
+## Seed data and indexing (Part 5)
+
+`db/migrations/002_seed_data.sql` inserts 120 deterministic bookings across
+5 cities, 4 orgs, and 4 statuses, plus `booking_events` rows for a subset —
+all applied automatically on `docker compose up -d` alongside the schema.
+
+Optimized query:
+
+```sql
+SELECT org_id, status, COUNT(*), SUM(amount)
+FROM hotel_bookings
+WHERE city = 'delhi' AND created_at >= NOW() - INTERVAL '30 days'
+GROUP BY org_id, status;
+```
+
+Index added in `db/migrations/003_add_indexes.sql`:
+
+```sql
+CREATE INDEX idx_hotel_bookings_city_created_at
+  ON hotel_bookings (city, created_at)
+  INCLUDE (org_id, status, amount);
+```
+
+`city` leads the key (equality filter), `created_at` follows (range filter)
+— together they turn the WHERE clause into a single index range scan
+instead of a full table scan. `org_id`, `status`, `amount` are added via
+`INCLUDE` rather than as key columns, since they're only needed for the
+`GROUP BY`/aggregation, not for filtering or sorting — this lets Postgres
+answer the query as an index-only scan without hitting the heap.
+
+## Backup and restore (Part 6)
+
+```bash
+./scripts/backup.sh                          # writes backups/<db>_<timestamp>.dump
+./scripts/restore.sh backups/<file>.dump      # restores into a fresh <db>_restore_verify database
+```
+
+`restore.sh` never touches the live database — it drops/recreates a
+separate `*_restore_verify` database and restores into that, so you can
+verify without risking the working copy. Verify the restore worked:
+
+```bash
+docker compose exec db psql -U app_admin -d hotel_bookings_restore_verify -c '\dt'
+docker compose exec db psql -U app_admin -d hotel_bookings_restore_verify -c 'SELECT COUNT(*) FROM hotel_bookings;'
+```
+
+Expect `\dt` to list both tables and the count to match the source database
+(120 seeded rows, or more if you've inserted your own data since).
+
 ## CI
 
 `.github/workflows/terraform.yml` runs on pull requests touching `infra/**`:
