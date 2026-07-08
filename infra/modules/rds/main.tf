@@ -35,7 +35,7 @@ resource "aws_db_instance" "main" {
 
   auto_minor_version_upgrade = true
 
-  # Private only: no public IP, reachable only from the ECS security group.
+  # RDS stays private: no public IP, only reachable from the ECS security group.
   publicly_accessible    = false
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [var.rds_sg_id]

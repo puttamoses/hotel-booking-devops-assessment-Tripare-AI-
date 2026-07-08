@@ -23,18 +23,18 @@ variable "private_subnet_cidrs" {
 }
 
 variable "enable_nat_gateway" {
-  description = "Whether to provision a NAT gateway so ECS tasks in private subnets can reach the internet"
+  description = "Provision a NAT gateway for private-subnet internet access"
   type        = bool
   default     = true
 }
 
 variable "container_port" {
-  description = "Port the application container listens on (used for the ALB target group + ecs-sg ingress rule)"
+  description = "App container port"
   type        = number
 }
 
 variable "db_port" {
-  description = "Port the database listens on (used for the rds-sg ingress rule)"
+  description = "Database port"
   type        = number
 }
 

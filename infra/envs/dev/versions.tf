@@ -8,9 +8,7 @@ terraform {
     }
   }
 
-  # Local backend, state kept separate per environment via the path below.
-  # For a real multi-engineer dev environment, swap this for a remote
-  # backend, e.g.:
+  # Local state by default. Swap for a remote backend, e.g.:
   #
   # backend "s3" {
   #   bucket         = "hotel-booking-tfstate-dev"

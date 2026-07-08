@@ -59,7 +59,7 @@ variable "container_port" {
 }
 
 variable "ecs_desired_count" {
-  description = "dev: single task, no redundancy needed for a review/test environment"
+  description = "Number of ECS tasks"
   type        = number
   default     = 1
 }
@@ -108,13 +108,13 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  description = "Master DB password. Supply via TF_VAR_db_password -- never commit a real value."
+  description = "Set via TF_VAR_db_password"
   type        = string
   sensitive   = true
 }
 
 variable "db_backup_retention_period" {
-  description = "dev: short retention, backups aren't relied on for recovery here"
+  description = "Backup retention in days"
   type        = number
   default     = 3
 }

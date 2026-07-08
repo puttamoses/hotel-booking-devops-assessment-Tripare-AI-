@@ -59,7 +59,7 @@ variable "container_port" {
 }
 
 variable "ecs_desired_count" {
-  description = "prod: 2 tasks across AZs for availability"
+  description = "Number of ECS tasks"
   type        = number
   default     = 2
 }
@@ -108,13 +108,13 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  description = "Master DB password. Supply via TF_VAR_db_password -- never commit a real value."
+  description = "Set via TF_VAR_db_password"
   type        = string
   sensitive   = true
 }
 
 variable "db_backup_retention_period" {
-  description = "prod: longer retention for real recovery scenarios"
+  description = "Backup retention in days"
   type        = number
   default     = 14
 }

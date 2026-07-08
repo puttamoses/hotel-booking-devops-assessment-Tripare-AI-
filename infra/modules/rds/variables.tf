@@ -25,7 +25,7 @@ variable "db_engine" {
 }
 
 variable "db_engine_version" {
-  description = "Major version only (e.g. \"16\"). RDS retires specific minor versions over time; auto_minor_version_upgrade handles patching."
+  description = "Major version only (e.g. \"16\") -- auto_minor_version_upgrade handles patching"
   type        = string
 }
 

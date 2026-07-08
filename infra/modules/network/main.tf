@@ -7,9 +7,7 @@ locals {
   })
 }
 
-# ---------------------------------------------------------------------------
-# VPC + subnets
-# ---------------------------------------------------------------------------
+# --- VPC + subnets ---
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -100,10 +98,7 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-# ---------------------------------------------------------------------------
-# Security groups (kept together in one module so ecs/rds modules never
-# need to reference each other directly -- avoids circular module deps)
-# ---------------------------------------------------------------------------
+# --- Security groups (alb -> ecs -> rds) ---
 
 resource "aws_security_group" "alb" {
   name        = "${local.name}-alb-sg"
@@ -185,9 +180,7 @@ resource "aws_security_group" "rds" {
   tags = merge(local.tags, { Name = "${local.name}-rds-sg" })
 }
 
-# ---------------------------------------------------------------------------
-# ALB (public entrypoint)
-# ---------------------------------------------------------------------------
+# --- ALB ---
 
 resource "aws_lb" "main" {
   name               = "${local.name}-alb"
@@ -229,6 +222,5 @@ resource "aws_lb_listener" "http" {
     target_group_arn = aws_lb_target_group.app.arn
   }
 
-  # Production would add a 443 listener with an ACM cert and redirect
-  # 80 -> 443; omitted here since there's no real domain/cert in scope.
+  # TODO: add an HTTPS listener once there's a real domain and ACM cert.
 }

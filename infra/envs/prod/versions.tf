@@ -8,8 +8,7 @@ terraform {
     }
   }
 
-  # Local backend, state kept separate per environment via the path below.
-  # A real prod environment should use a remote backend with locking, e.g.:
+  # Local state by default. Swap for a remote backend, e.g.:
   #
   # backend "s3" {
   #   bucket         = "hotel-booking-tfstate-prod"
