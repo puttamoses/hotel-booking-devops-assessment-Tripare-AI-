@@ -2,11 +2,17 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if [ -z "${1:-}" ]; then
-  echo "Usage: $0 <backup-file>  (e.g. backups/hotel_bookings_20260707_120000.dump)"
-  exit 1
+BACKUP_FILE="${1:-}"
+
+if [ -z "$BACKUP_FILE" ]; then
+  BACKUP_FILE=$(ls -t backups/*.dump 2>/dev/null | head -n1 || true)
+  if [ -z "$BACKUP_FILE" ]; then
+    echo "No backup file given and none found in backups/. Run ./scripts/backup.sh first."
+    echo "Usage: $0 [backup-file]  (e.g. backups/hotel_bookings_20260707_120000.dump)"
+    exit 1
+  fi
+  echo "No backup file given, using most recent: $BACKUP_FILE"
 fi
-BACKUP_FILE="$1"
 
 if [ ! -f "$BACKUP_FILE" ]; then
   echo "Backup file not found: $BACKUP_FILE"

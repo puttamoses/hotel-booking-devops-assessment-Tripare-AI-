@@ -51,7 +51,8 @@ docker compose exec db psql -U app_admin -d hotel_bookings -c '\dt'
 
 ```bash
 ./scripts/backup.sh
-./scripts/restore.sh backups/<file>.dump
+./scripts/restore.sh                          # restores the most recent backup
+./scripts/restore.sh backups/<file>.dump      # or restore a specific one
 ```
 
 `restore.sh` restores into a separate `_restore_verify` database, so it
