@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+ARG="${1:-}"
+if [ -n "$ARG" ]; then
+  case "$ARG" in
+    /*) BACKUP_FILE="$ARG" ;;
+    *) BACKUP_FILE="$(pwd)/$ARG" ;;
+  esac
+fi
+
 cd "$(dirname "$0")/.."
 
-BACKUP_FILE="${1:-}"
-
-if [ -z "$BACKUP_FILE" ]; then
+if [ -z "${BACKUP_FILE:-}" ]; then
   BACKUP_FILE=$(ls -t backups/*.dump 2>/dev/null | head -n1 || true)
   if [ -z "$BACKUP_FILE" ]; then
     echo "No backup file given and none found in backups/. Run ./scripts/backup.sh first."
